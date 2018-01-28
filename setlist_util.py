@@ -13,7 +13,7 @@
 #
 
 
-import math, pprint, requests, urllib
+import json, math, pprint, requests, urllib
 
 # headers for GET requests
 HEADERS = {"Accept": "application/json", "x-api-key": "7a66baa8-d27c-4718-88ec-5f55d285b643"}
@@ -29,12 +29,12 @@ HEADERS = {"Accept": "application/json", "x-api-key": "7a66baa8-d27c-4718-88ec-5
 #   A list of songs played by artist on their tour
 #
 def get_songs_by_tour(artist, tour):
-    artist = urllib.quote(artist)
-    tour = urllib.quote(tour)
+    artist = urllib.quote(artist.encode('utf8'))
+    tour = urllib.quote(tour.encode('utf8'))
     url = "https://api.setlist.fm/rest/1.0/search/setlists?artistName=" + artist + "&tourName=" + tour
     r = requests.get(url, headers=HEADERS)
-    data = r.json()
-    numPages = int(math.ceil(data['total']/20))
+    data = json.loads(r.text)
+    numPages = int(math.ceil(float(data['total'])/20))
     songs = []
     for page in range(1, numPages+1):
         r = requests.get(url + "&p=" + str(page), headers=HEADERS)
@@ -58,17 +58,16 @@ def get_songs_by_tour(artist, tour):
 #   A list of songs played by artist at a specific concert
 #
 def get_songs_by_event(artist, date, venue):
-    artist = urllib.quote(artist)
-    date = urllib.quote(date)
-    venue = urllib.quote(venue)
+    artist = urllib.quote(artist.encode('utf8'))
+    date = urllib.quote(date.encode('utf8'))
+    venue = urllib.quote(venue.encode('utf8'))
     r = requests.get("https://api.setlist.fm/rest/1.0/search/setlists?date=" + date + "&artistName=" + artist + "&venueName=" + venue, headers=HEADERS)
-    data = r.json()
+    data = json.loads(r.text)
 
     pprint.pprint(data)
     songs = []
     for set in data['setlist'][0]['sets']['set']:
         for song in set['song']:
-            if 'cover' not in song.keys():
-                songs.append(song['name'])
+            songs.append(song['name'])
     return songs
 

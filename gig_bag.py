@@ -21,7 +21,7 @@
 #           tour: name of tour
 #
 
-import base64, json, requests, sys, urllib
+import base64, json, pprint, requests, sys, urllib
 import setlist_util, spotify_util
 
 from flask import Flask, request, redirect, render_template
@@ -120,10 +120,12 @@ def callback():
         songs = setlist_util.get_songs_by_event(artist, date, venue)
 
     # get Spotify ID for each song
+    pprint.pprint(songs)
     song_ids = []
     for i in songs:
         response = spotify_util.get_song(artist, i, auth_header)
-        song_ids.append("spotify:track:" + response["id"])
+        if 'id' in response.keys():
+            song_ids.append("spotify:track:" + response["id"])
 
     # create Spotify playlist
     playlist_id = spotify_util.init_playlist(user_id, title, auth_header_json)["id"]

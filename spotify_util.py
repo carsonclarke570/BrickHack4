@@ -65,7 +65,7 @@ def init_playlist(user_id, name, auth):
 #
 def get_song(artist, song, auth):
     song_api_endpoint = "{}/search".format(SPOTIFY_API_BASE_URL);
-    res = song_api_endpoint + "?q=" + urllib.quote(song) + "+" + urllib.quote(artist)
+    res = song_api_endpoint + "?q=" + urllib.quote(song.encode('utf8')) + "+" + urllib.quote(artist.encode('utf8'))
     res = res + "&type=track&limit=1";
     song_api_response = requests.get(res, headers=auth)
     song_api_response = json.loads(song_api_response.text)
