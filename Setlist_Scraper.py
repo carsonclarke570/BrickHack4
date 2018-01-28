@@ -71,13 +71,12 @@ def main():
         artist = search_args[0]
         tour_name = search_args[1]
         songs = get_songs_by_tour(artist, tour_name)
-        for song in songs:
-            print song + '\n'
 
     if option == "-c":
         artist = search_args[0]
         date = search_args[1]
         venue = search_args[2]
         songs = get_songs_by_event(artist, date, venue)
+
 
 main()
