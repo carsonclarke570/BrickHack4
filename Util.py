@@ -17,7 +17,7 @@ SPOTIFY_API_BASE_URL = "https://api.spotify.com/v1"
 def add_song(song_uris, user_id, playlist_id, auth):
     data = "{\"uris\": ["
     for i in song_uris:
-        data += "\"spotify:track:" + i + "\""
+        data += "\"spotify:track:" + i + "\","
 
     data += "]}"
     print data

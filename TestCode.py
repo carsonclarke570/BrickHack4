@@ -14,6 +14,8 @@ from flask import Flask, request, redirect, render_template
 import requests
 import base64
 import Util
+import sys
+import Setlist_Scraper
 
 app = Flask(__name__)
 
@@ -85,11 +87,37 @@ def callback():
     profile_response = requests.get(user_profile_api_endpoint, headers=auth_header)
     user_id = json.loads(profile_response.text)["id"]
 
-    stuff = Util.init_playlist(user_id, "Test", auth_header_json)
-    stuff = Util.add_song({"4iV5W9uYEdYUVa79Axb7Rh"}, user_id, stuff["id"], auth_header_json)
+    option = sys.argv[1]
+    print sys.argv
+    search_args = sys.argv[2:]
+    songs = {}
+    artist = None
+    title = ""
+    if option == "-t":
+        artist = search_args[0]
+        tour_name = search_args[1]
+        title = artist + " during " + tour_name
+        songs = Setlist_Scraper.get_songs_by_tour(artist, tour_name)
+
+    if option == "-c":
+        artist = search_args[0]
+        date = search_args[1]
+        venue = search_args[2]
+        title = artist + " at " + venue + " on " + date
+        songs = Setlist_Scraper.get_songs_by_event(artist, date, venue)
+
+    song_ids = []
+    for i in songs:
+        song_ids.append(Util.get_song(artist, i, auth_header)["id"])
+
+    playlist_id = Util.init_playlist(user_id, title, auth_header_json)["id"]
+    Util.add_song(song_ids, user_id, playlist_id, auth_header_json)
+
+    #stuff = Util.init_playlist(user_id, "Test", auth_header_json)
+    #stuff = Util.add_song({"4iV5W9uYEdYUVa79Axb7Rh"}, user_id, stuff["id"], auth_header_json)
 
     # Combine profile and playlist data to display
-    display_arr = stuff
+    display_arr = {}
     return render_template("index.html", sorted_array=display_arr)
 
 
