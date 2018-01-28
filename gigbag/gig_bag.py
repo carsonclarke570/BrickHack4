@@ -21,7 +21,7 @@
 #           tour: name of tour
 #
 
-import base64, json, os, requests, sys, urllib
+import base64, json, os, pprint, requests, sys, urllib
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from gigbag.lib import spotify_util, setlist_util
@@ -122,13 +122,18 @@ def callback():
         title = artist + " at " + venue + " on " + date
         songs = setlist_util.get_songs_by_event(artist, date, venue)
 
+    context = []
     song_ids = []
     for i in songs:
         response = spotify_util.get_song(artist, i, auth_header)
         if 'id' in response.keys():
-            song_ids.append("spotify:track:" + response["id"])
+            s_id = "spotify:track:" + response["id"]
+            a_url = response["album"]["images"][2]["url"]
+            context.append({"s_name": i, "a_url": a_url})
+            song_ids.append(s_id)
         else:
             songs.remove(i)
+
 
     # create Spotify playlist
     playlist_id = spotify_util.init_playlist(user_id, title, auth_header_json)["id"]
@@ -136,7 +141,7 @@ def callback():
     # add songs to playlist
     spotify_util.add_song(song_ids, user_id, playlist_id, auth_header_json)
 
-    return render_template("success.html", song_list=songs)
+    return render_template("success.html", context=context)
 
 if __name__ == '__main__':
     app.run(debug=True, port=PORT)

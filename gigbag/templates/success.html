@@ -21,10 +21,10 @@
       </nav>
       <h1 style="margin-left:20px">Added:</h1>
       <ul class="collection">
-        {% for s in song_list %}
+        {% for s in context %}
           <li class="collection-item avatar">
-            <i class="material-icons circle red">audiotrack</i>
-            <span class="title">{{ s }}</span>
+            <img src="{{ s['a_url'] }}" alt ="" class="circle">
+            <span class="title">{{ s['s_name'] }}</span>
             <p>
               Test
             </p>
