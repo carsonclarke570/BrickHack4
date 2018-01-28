@@ -21,14 +21,13 @@
 #           tour: name of tour
 #
 
-import base64, json, pprint, requests, sys, urllib
-import setlist_util, spotify_util
+import base64, json, os, requests, sys, urllib
 
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from gigbag.lib import spotify_util, setlist_util
 from flask import Flask, request, redirect, render_template
 
-
 app = Flask(__name__)
-
 
 #Spotify stuff
 SPOTIFY_AUTH_URL = "https://accounts.spotify.com/authorize"
@@ -57,16 +56,20 @@ auth_query_parameters = {
     "client_id": CLIENT_ID
 }
 
+@app.route("/", methods=['GET', 'POST'])
+def index():
+    return render_template("index.html")
+
 #
 # Redirects to Spotify's authorization service
 #
 # Returns:
 #    A redirect to the spotify authorization service
 #
-@app.route("/")
-def index():
+@app.route("/authorize", methods=['GET', 'POST'])
+def authorize():
     url_args = "&".join(["{}={}".format(key, urllib.quote(val)) for key, val in auth_query_parameters.iteritems()])
-    auth_url =  "{}/?{}".format(SPOTIFY_AUTH_URL, url_args)
+    auth_url = "{}/?{}".format(SPOTIFY_AUTH_URL, url_args)
     return redirect(auth_url)
 
 #
@@ -75,7 +78,7 @@ def index():
 # Returns:
 #   Renders index.html
 #
-@app.route("/callback/q")
+@app.route("/callback/q", methods=['GET', 'POST'])
 def callback():
     auth_token = request.args['code']
     code_payload = {
@@ -119,13 +122,13 @@ def callback():
         title = artist + " at " + venue + " on " + date
         songs = setlist_util.get_songs_by_event(artist, date, venue)
 
-    # get Spotify ID for each song
-    pprint.pprint(songs)
     song_ids = []
     for i in songs:
         response = spotify_util.get_song(artist, i, auth_header)
         if 'id' in response.keys():
             song_ids.append("spotify:track:" + response["id"])
+        else:
+            songs.remove(i)
 
     # create Spotify playlist
     playlist_id = spotify_util.init_playlist(user_id, title, auth_header_json)["id"]
@@ -133,10 +136,7 @@ def callback():
     # add songs to playlist
     spotify_util.add_song(song_ids, user_id, playlist_id, auth_header_json)
 
-    # render index.html
-    display_arr = {}
-    return render_template("index.html", sorted_array=display_arr)
+    return render_template("success.html", song_list=songs)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run(debug=True, port=PORT)

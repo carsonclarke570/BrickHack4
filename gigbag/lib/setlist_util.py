@@ -65,7 +65,6 @@ def get_songs_by_event(artist, date, venue):
     r = requests.get("https://api.setlist.fm/rest/1.0/search/setlists?date=" + date + "&artistName=" + artist + "&venueName=" + venue, headers=HEADERS)
     data = json.loads(r.text)
 
-    pprint.pprint(data)
     songs = []
     for set in data['setlist'][0]['sets']['set']:
         for song in set['song']:

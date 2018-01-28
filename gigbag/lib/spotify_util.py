@@ -31,9 +31,7 @@ SPOTIFY_API_BASE_URL = "https://api.spotify.com/v1"
 #
 def add_song(song_uris, user_id, playlist_id, auth):
     add_song_endpoint = "{}/users/{}/playlists/{}/tracks".format(SPOTIFY_API_BASE_URL, user_id, playlist_id)
-    print add_song_endpoint
     add_song_response = requests.post(add_song_endpoint, data=json.dumps({"uris": song_uris}), headers=auth)
-    print add_song_response
     return json.loads(add_song_response.text)
 
 #
@@ -75,6 +73,3 @@ def get_song(artist, song, auth):
                 song_api_response = i
 
     return song_api_response
-
-
-
