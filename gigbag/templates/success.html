@@ -14,9 +14,22 @@
       <!--Import jQuery before materialize.js-->
       <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
       <script type="text/javascript" src="../static/js/materialize.min.js"></script>
+      <nav>
+        <div class="nav-wrapper">
+          <a href="index.html" class="brand-logo left">Gig Bag</a>
+        </div>
+      </nav>
       <h1>Added:</h1>
-      {% for s in song_list %}
-          <p>{{ s }}</p>
-      {% endfor %}
+      <ul class="collection">
+        {% for s in song_list %}
+          <li class="collection-item avatar">
+            <i class="material-icons circle red">audiotrack</i>
+            <span class="title">{{ s }}</span>
+            <p>
+              Test
+            </p>
+          </li>
+        {% endfor %}
+      </ul>
     </body>
   </html>
