@@ -44,11 +44,6 @@ def get_songs_by_tour(artist, tour):
     return songs
 
 
-
-
-    pprint.pprint(r.json())
-    return songs
-
 def get_songs_by_event(artist, date, venue):
     artist = urllib.quote(artist)
     date = urllib.quote(date)
@@ -56,21 +51,24 @@ def get_songs_by_event(artist, date, venue):
     r = requests.get("https://api.setlist.fm/rest/1.0/search/setlists?date=" + date + "&artistName=" + artist + "&venueName=" + venue, headers=headers)
     data = r.json()
 
+    songs = []
     pprint.pprint(data)
-    songs = data['setlist'][0]['sets']['set'][0]['song']
+    for set in data['setlist'][0]['sets']['set']:
+        for song in set['song']:
+            songs.append(song['name'])
     return songs
 
 
 def main():
 
     option = sys.argv[1]
-    print sys.argv
     search_args = sys.argv[2:]
-    songs = {}
+    songs = []
     if option == "-t":
         artist = search_args[0]
         tour_name = search_args[1]
         songs = get_songs_by_tour(artist, tour_name)
+        print '\n'
         for song in songs:
             print song + '\n'
 
@@ -79,5 +77,8 @@ def main():
         date = search_args[1]
         venue = search_args[2]
         songs = get_songs_by_event(artist, date, venue)
+        print '\n'
+        for song in songs:
+            print song + '\n'
 
 main()
