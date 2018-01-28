@@ -15,15 +15,9 @@ SPOTIFY_API_BASE_URL = "https://api.spotify.com/v1"
 # Spotify requests
 
 def add_song(song_uris, user_id, playlist_id, auth):
-    data = "{\"uris\": ["
-    for i in song_uris:
-        data += "\"spotify:track:" + i + "\","
-
-    data += "]}"
-    print data
     add_song_endpoint = "{}/users/{}/playlists/{}/tracks".format(SPOTIFY_API_BASE_URL, user_id, playlist_id)
     print add_song_endpoint
-    add_song_response = requests.post(add_song_endpoint, data=data, headers=auth)
+    add_song_response = requests.post(add_song_endpoint, data=json.dumps({"uris": song_uris}), headers=auth)
     print add_song_response
     return json.loads(add_song_response.text)
 
@@ -41,7 +35,7 @@ def get_song(artist, song, auth):
     for i in song_api_response["tracks"]["items"]:
         for j in i["artists"]:
             if j["name"].lower() == artist.lower():
-                song_api_response = j
+                song_api_response = i
 
     return song_api_response
 

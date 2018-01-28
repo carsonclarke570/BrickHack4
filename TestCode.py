@@ -16,6 +16,7 @@ import base64
 import Util
 import sys
 import Setlist_Scraper
+import pprint
 
 app = Flask(__name__)
 
@@ -108,8 +109,10 @@ def callback():
 
     song_ids = []
     for i in songs:
-        song_ids.append(Util.get_song(artist, i, auth_header)["id"])
+        response = Util.get_song(artist, i, auth_header)
+        song_ids.append("spotify:track:" + response["id"])
 
+    print song_ids
     playlist_id = Util.init_playlist(user_id, title, auth_header_json)["id"]
     Util.add_song(song_ids, user_id, playlist_id, auth_header_json)
 
