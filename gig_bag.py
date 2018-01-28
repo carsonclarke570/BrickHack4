@@ -4,21 +4,31 @@
 # Proprietary and confidential
 # Written by Carson Clarke-Magrab <ctc7359@rit.edu> & Eric Kanis <erk2974@rit.edu>, January 2018
 #
-# Spotify_Midware.py
+
 #
-# Interacts with Spotify
+# File: gig_bag.py
+# Date: 1/27/2018
+# Authors: Eric Kanis & Carson Clarke-Magrab
+# Description: The GigBag app coverts set lists from various tours and concerts into Spotify playlists
+#
+#       Usage: gig_bag -flags [artist] <flag dependent arguments>
+#       1)     gig_bag -c [artist] [date] [venue]
+#           artist: artist's name
+#           date: date of specific concert (Format: [day]-[month]-[year])
+#`          venue: name of venue
+#       2)     gig_bag -t [artist] [tour]
+#           artist: artist's name
+#           tour: name of tour
 #
 
-import json
+import base64, json, requests, sys, urllib
+import setlist_util, spotify_util
+
 from flask import Flask, request, redirect, render_template
-import requests
-import base64
-import Util
-import sys
-import Setlist_Scraper
-import pprint
+
 
 app = Flask(__name__)
+
 
 #Spotify stuff
 SPOTIFY_AUTH_URL = "https://accounts.spotify.com/authorize"
@@ -40,14 +50,6 @@ STATE = ""
 SHOW_DIALOG_bool = True
 SHOW_DIALOG_str = str(SHOW_DIALOG_bool).lower()
 
-AUTH_QUERY = {
-    "response_type": "code",
-    "redirect_uri": REDIRECT_URI,
-    "scope": SCOPE,
-    "client_id": CLIENT_ID
-}
-
-#Test code
 auth_query_parameters = {
     "response_type": "code",
     "redirect_uri": REDIRECT_URI,
@@ -55,13 +57,24 @@ auth_query_parameters = {
     "client_id": CLIENT_ID
 }
 
-
+#
+# Redirects to Spotify's authorization service
+#
+# Returns:
+#    A redirect to the spotify authorization service
+#
 @app.route("/")
 def index():
-    auth_url = Util.make_url_args(SPOTIFY_AUTH_URL, auth_query_parameters)
+    url_args = "&".join(["{}={}".format(key, urllib.quote(val)) for key, val in auth_query_parameters.iteritems()])
+    auth_url =  "{}/?{}".format(SPOTIFY_AUTH_URL, url_args)
     return redirect(auth_url)
 
-
+#
+# Confirms Spotify authorization and creates playlist from commandline data
+#
+# Returns:
+#   Renders index.html
+#
 @app.route("/callback/q")
 def callback():
     auth_token = request.args['code']
@@ -76,18 +89,17 @@ def callback():
 
     response_data = json.loads(post_request.text)
     access_token = response_data["access_token"]
-    refresh_token = response_data["refresh_token"]
-    token_type = response_data["token_type"]
-    expires_in = response_data["expires_in"]
 
-    # Use the access token to access Spotify API
+    # authorization headers
     auth_header = {"Authorization": "Bearer {}".format(access_token)}
     auth_header_json = {"Authorization": "Bearer {}".format(access_token), "Content-Type": "application/json"}
 
+    # get user info
     user_profile_api_endpoint = "{}/me".format(SPOTIFY_API_URL)
     profile_response = requests.get(user_profile_api_endpoint, headers=auth_header)
     user_id = json.loads(profile_response.text)["id"]
 
+    # use commandline arguments to get data
     option = sys.argv[1]
     print sys.argv
     search_args = sys.argv[2:]
@@ -98,28 +110,28 @@ def callback():
         artist = search_args[0]
         tour_name = search_args[1]
         title = artist + " during " + tour_name
-        songs = Setlist_Scraper.get_songs_by_tour(artist, tour_name)
+        songs = setlist_util.get_songs_by_tour(artist, tour_name)
 
     if option == "-c":
         artist = search_args[0]
         date = search_args[1]
         venue = search_args[2]
         title = artist + " at " + venue + " on " + date
-        songs = Setlist_Scraper.get_songs_by_event(artist, date, venue)
+        songs = setlist_util.get_songs_by_event(artist, date, venue)
 
+    # get Spotify ID for each song
     song_ids = []
     for i in songs:
-        response = Util.get_song(artist, i, auth_header)
+        response = spotify_util.get_song(artist, i, auth_header)
         song_ids.append("spotify:track:" + response["id"])
 
-    print song_ids
-    playlist_id = Util.init_playlist(user_id, title, auth_header_json)["id"]
-    Util.add_song(song_ids, user_id, playlist_id, auth_header_json)
+    # create Spotify playlist
+    playlist_id = spotify_util.init_playlist(user_id, title, auth_header_json)["id"]
 
-    #stuff = Util.init_playlist(user_id, "Test", auth_header_json)
-    #stuff = Util.add_song({"4iV5W9uYEdYUVa79Axb7Rh"}, user_id, stuff["id"], auth_header_json)
+    # add songs to playlist
+    spotify_util.add_song(song_ids, user_id, playlist_id, auth_header_json)
 
-    # Combine profile and playlist data to display
+    # render index.html
     display_arr = {}
     return render_template("index.html", sorted_array=display_arr)
 
