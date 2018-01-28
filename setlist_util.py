@@ -17,6 +17,7 @@ import json, math, pprint, requests, urllib
 
 # headers for GET requests
 HEADERS = {"Accept": "application/json", "x-api-key": "7a66baa8-d27c-4718-88ec-5f55d285b643"}
+ITEMS_PER_PAGE = 20
 
 #
 # Gets the list of songs played on a specific tour
@@ -34,7 +35,7 @@ def get_songs_by_tour(artist, tour):
     url = "https://api.setlist.fm/rest/1.0/search/setlists?artistName=" + artist + "&tourName=" + tour
     r = requests.get(url, headers=HEADERS)
     data = json.loads(r.text)
-    numPages = int(math.ceil(float(data['total'])/20))
+    numPages = int(math.ceil(float(data['total'])/ITEMS_PER_PAGE))
     songs = []
     for page in range(1, numPages+1):
         r = requests.get(url + "&p=" + str(page), headers=HEADERS)
