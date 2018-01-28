@@ -8,3 +8,13 @@
 #
 # Collects setlist information from setlist.fm
 #
+
+import requests
+import json
+import pprint
+
+headers = { "Accept" : "application/json", "x-api-key" : "a13409ea-3590-4eca-ac71-d013db6e9d1b"}
+r = requests.get('https://api.setlist.fm/rest/1.0/search/venues?cityName=Chicago&p=1', headers=headers)
+js = r.json()
+
+pprint.pprint(js)
