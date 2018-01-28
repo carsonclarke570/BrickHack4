@@ -75,6 +75,3 @@ def get_song(artist, song, auth):
                 song_api_response = i
 
     return song_api_response
-
-
-

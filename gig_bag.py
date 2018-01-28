@@ -24,8 +24,7 @@
 import base64, json, pprint, requests, sys, urllib
 import setlist_util, spotify_util
 
-from flask import Flask, request, redirect, render_template
-
+from flask import Flask, request, redirect, render_template, url_for
 
 app = Flask(__name__)
 
@@ -36,6 +35,7 @@ SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token"
 SPOTIFY_API_BASE_URL = "https://api.spotify.com"
 API_VERSION = "v1"
 SPOTIFY_API_URL = "{}/{}".format(SPOTIFY_API_BASE_URL, API_VERSION)
+AUTH_TOKEN = None
 
 # Client keys
 CLIENT_ID = "5dad0a666d5d4b8c948dddb2bd0b289e"
@@ -57,16 +57,20 @@ auth_query_parameters = {
     "client_id": CLIENT_ID
 }
 
+@app.route("/")
+def index():
+    return render_template("index.html")
+
 #
 # Redirects to Spotify's authorization service
 #
 # Returns:
 #    A redirect to the spotify authorization service
 #
-@app.route("/")
-def index():
+@app.route("/authorize")
+def authorize():
     url_args = "&".join(["{}={}".format(key, urllib.quote(val)) for key, val in auth_query_parameters.iteritems()])
-    auth_url =  "{}/?{}".format(SPOTIFY_AUTH_URL, url_args)
+    auth_url = "{}/?{}".format(SPOTIFY_AUTH_URL, url_args)
     return redirect(auth_url)
 
 #
@@ -75,7 +79,7 @@ def index():
 # Returns:
 #   Renders index.html
 #
-@app.route("/callback/q")
+@app.route("/callback/q", methods=['GET', 'POST'])
 def callback():
     auth_token = request.args['code']
     code_payload = {
@@ -88,6 +92,7 @@ def callback():
     post_request = requests.post(SPOTIFY_TOKEN_URL, data=code_payload, headers=headers)
 
     response_data = json.loads(post_request.text)
+    pprint.pprint(response_data)
     access_token = response_data["access_token"]
 
     # authorization headers
@@ -119,8 +124,6 @@ def callback():
         title = artist + " at " + venue + " on " + date
         songs = setlist_util.get_songs_by_event(artist, date, venue)
 
-    # get Spotify ID for each song
-    pprint.pprint(songs)
     song_ids = []
     for i in songs:
         response = spotify_util.get_song(artist, i, auth_header)
@@ -133,9 +136,6 @@ def callback():
     # add songs to playlist
     spotify_util.add_song(song_ids, user_id, playlist_id, auth_header_json)
 
-    # render index.html
-    display_arr = {}
-    return render_template("index.html", sorted_array=display_arr)
 
 
 if __name__ == "__main__":
