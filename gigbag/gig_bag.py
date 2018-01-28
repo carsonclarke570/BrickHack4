@@ -22,12 +22,11 @@
 #
 
 import base64, json, pprint, requests, sys, urllib
-import setlist_util, spotify_util
 
-from flask import Flask, request, redirect, render_template, url_for
+from gigbag.lib import spotify_util, setlist_util
+from flask import Flask, request, redirect, render_template
 
 app = Flask(__name__)
-
 
 #Spotify stuff
 SPOTIFY_AUTH_URL = "https://accounts.spotify.com/authorize"
@@ -57,7 +56,7 @@ auth_query_parameters = {
     "client_id": CLIENT_ID
 }
 
-@app.route("/")
+@app.route("/", methods=['GET', 'POST'])
 def index():
     return render_template("index.html")
 
@@ -67,7 +66,7 @@ def index():
 # Returns:
 #    A redirect to the spotify authorization service
 #
-@app.route("/authorize")
+@app.route("/authorize", methods=['GET', 'POST'])
 def authorize():
     url_args = "&".join(["{}={}".format(key, urllib.quote(val)) for key, val in auth_query_parameters.iteritems()])
     auth_url = "{}/?{}".format(SPOTIFY_AUTH_URL, url_args)
@@ -92,7 +91,6 @@ def callback():
     post_request = requests.post(SPOTIFY_TOKEN_URL, data=code_payload, headers=headers)
 
     response_data = json.loads(post_request.text)
-    pprint.pprint(response_data)
     access_token = response_data["access_token"]
 
     # authorization headers
@@ -136,7 +134,8 @@ def callback():
     # add songs to playlist
     spotify_util.add_song(song_ids, user_id, playlist_id, auth_header_json)
 
+    pprint.pprint(songs)
+    return render_template("success.html", context={"songs":songs})
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run(debug=True, port=PORT)
