@@ -42,6 +42,8 @@ INSTALLATION
         4) After a confirmation page loads, check your Spotify account for
            the new playlist!
 
+ * WARNING: The code can run slowly sometimes. Be patient.
+
 MAINTAINERS
 -----------
 
