@@ -34,7 +34,6 @@ SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token"
 SPOTIFY_API_BASE_URL = "https://api.spotify.com"
 API_VERSION = "v1"
 SPOTIFY_API_URL = "{}/{}".format(SPOTIFY_API_BASE_URL, API_VERSION)
-AUTH_TOKEN = None
 
 # Client keys
 CLIENT_ID = "5dad0a666d5d4b8c948dddb2bd0b289e"
@@ -134,7 +133,6 @@ def callback():
     # add songs to playlist
     spotify_util.add_song(song_ids, user_id, playlist_id, auth_header_json)
 
-    pprint.pprint(songs)
     return render_template("success.html", context={"songs":songs})
 
 if __name__ == '__main__':
