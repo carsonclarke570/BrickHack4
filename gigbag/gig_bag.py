@@ -21,8 +21,9 @@
 #           tour: name of tour
 #
 
-import base64, json, pprint, requests, sys, urllib
+import base64, json, os, requests, sys, urllib
 
+sys.path.append(os.path.join(__file__), '..')
 from gigbag.lib import spotify_util, setlist_util
 from flask import Flask, request, redirect, render_template
 
