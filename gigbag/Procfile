@@ -1,1 +1,1 @@
-web: gunicorn gigbag:gigbag --log-file=-
+web: gunicorn app:app --log-file=-
