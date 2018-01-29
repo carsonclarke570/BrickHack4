@@ -29,18 +29,8 @@ INSTALLATION
 ------------
 
  * To run the program:
-        1) Run either:
-            - python gig_bag.py -c [artist] [date] [venue]
-                * artist: name of the artist you want to find a setlist for
-                * date: date of the concert
-                * venue: venue of the concert
-            - python gig_bag.py -t [artist] [tour]
-                * artist: name of the artist you want to find a setlist for
-                * tour: name of the tour the artist performed
-        2) 127.0.0.1:8080 in your web browser and hit "Create"
-        3) Spotify wil request authorization
-        4) After a confirmation page loads, check your Spotify account for
-           the new playlist!
+        1) Run either: python gig_bag.py
+        2) Visit 127.0.0.1:8080 in your web browser
 
  * WARNING: The code can run slowly sometimes. Be patient.
 
