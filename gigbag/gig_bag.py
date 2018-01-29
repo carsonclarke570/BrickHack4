@@ -108,11 +108,18 @@ def callback():
     profile_response = requests.get(user_profile_api_endpoint, headers=auth_header)
     user_id = json.loads(profile_response.text)["id"]
 
-    # Get data
+    # Get data from URL
     artist = data['artist']
     tour_name = data['tour']
     title = artist + " during " + tour_name
-    songs = setlist_util.get_songs_by_tour(artist, tour_name)
+
+    # Get data from setlist.fm
+    setlist_data = setlist_util.get_songs_by_tour(artist, tour_name);
+    songs = setlist_data['songs']
+    artist = setlist_data['artist']
+    tour_name = setlist_data['tour']
+    title = artist + "[" + tour_name + "]"
+
 
 
     # if option == "-c":
