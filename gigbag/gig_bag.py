@@ -21,7 +21,7 @@
 #           tour: name of tour
 #
 
-import base64, json, os, pprint, requests, sys, urllib
+import base64, cgi, json, os, pprint, requests, sys, urllib
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from gigbag.lib import spotify_util, setlist_util
@@ -53,7 +53,8 @@ auth_query_parameters = {
     "response_type": "code",
     "redirect_uri": REDIRECT_URI,
     "scope": SCOPE,
-    "client_id": CLIENT_ID
+    "client_id": CLIENT_ID,
+    "state": ""
 }
 
 @app.route("/", methods=['GET', 'POST'])
@@ -64,10 +65,14 @@ def index():
 # Redirects to Spotify's authorization service
 #
 # Returns:
-#    A redirect to the spotify authorization service
+#    A redirect to the Spotify authorization service
 #
 @app.route("/authorize", methods=['GET', 'POST'])
 def authorize():
+    artist = request.args.get('artist')
+    tour = request.args.get('tour')
+    state_json = json.dumps({"artist": artist, "tour": tour})
+    auth_query_parameters['state'] = state_json
     url_args = "&".join(["{}={}".format(key, urllib.quote(val)) for key, val in auth_query_parameters.iteritems()])
     auth_url = "{}/?{}".format(SPOTIFY_AUTH_URL, url_args)
     return redirect(auth_url)
@@ -80,6 +85,7 @@ def authorize():
 #
 @app.route("/callback/q", methods=['GET', 'POST'])
 def callback():
+    data = json.loads(request.args.get('state'))
     auth_token = request.args['code']
     code_payload = {
         "grant_type": "authorization_code",
@@ -102,25 +108,19 @@ def callback():
     profile_response = requests.get(user_profile_api_endpoint, headers=auth_header)
     user_id = json.loads(profile_response.text)["id"]
 
-    # use commandline arguments to get data
-    option = sys.argv[1]
-    print sys.argv
-    search_args = sys.argv[2:]
-    songs = {}
-    artist = None
-    title = ""
-    if option == "-t":
-        artist = search_args[0]
-        tour_name = search_args[1]
-        title = artist + " during " + tour_name
-        songs = setlist_util.get_songs_by_tour(artist, tour_name)
+    # Get data
+    artist = data['artist']
+    tour_name = data['tour']
+    title = artist + " during " + tour_name
+    songs = setlist_util.get_songs_by_tour(artist, tour_name)
 
-    if option == "-c":
-        artist = search_args[0]
-        date = search_args[1]
-        venue = search_args[2]
-        title = artist + " at " + venue + " on " + date
-        songs = setlist_util.get_songs_by_event(artist, date, venue)
+
+    # if option == "-c":
+    #     artist = search_args[0]
+    #     date = search_args[1]
+    #     venue = search_args[2]
+    #     title = artist + " at " + venue + " on " + date
+    #     songs = setlist_util.get_songs_by_event(artist, date, venue)
 
     context = []
     song_ids = []

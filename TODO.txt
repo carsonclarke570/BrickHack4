@@ -1,3 +1,4 @@
 TO-DO
 - Add form submission / remove commandline
 - Create template for the templates
+- Create a template for failure

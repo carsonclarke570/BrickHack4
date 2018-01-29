@@ -23,22 +23,22 @@
         <div class="card-panel grey darken-3 white-text center-align">
           <div class="row">
             <h3>Search by Tour:</h3>
-            <form class="col s12">
+            <form class="col s12" action="authorize", method="GET">
               <div class="row">
                 <div class="input-field col s4">
                   <i class="material-icons prefix">account_circle</i>
-                  <input id="icon_artist" type="text" class="validate">
-                  <label for="icon_artist">Artist Name</label>
+                  <input id="artist" type="text" name="artist">
+                  <label for="artist">Artist Name</label>
                 </div>
                 <div class="input-field col s4">
                   <i class="material-icons prefix">directions_transit</i>
-                  <input id="icon_tour" type="text" class="validate">
-                  <label for="icon_tour">Tour Name</label>
+                  <input id="tour" type="text" name="tour">
+                  <label for="tour">Tour Name</label>
                 </div>
                 <div class="col s4">
-                  <a href="authorize" class="btn grey darken-1 waves-effect waves-light" type="submit" name="action">
-                    <i class="large material-icons right">play_circle_outline</i>CREATE
-                  </a>
+                  <button class="btn grey darken-1 waves-effect waves-light" type="submit">Create
+                    <i class="large material-icons right">play_circle_outline</i>
+                  </button>
                 </div>
               </div>
             </form>
