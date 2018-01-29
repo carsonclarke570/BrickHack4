@@ -21,7 +21,7 @@
 #           tour: name of tour
 #
 
-import base64, cgi, json, os, pprint, requests, sys, urllib
+import base64, json, os, requests, sys, urllib
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from gigbag.lib import spotify_util, setlist_util
@@ -111,10 +111,9 @@ def callback():
     # Get data from URL
     artist = data['artist']
     tour_name = data['tour']
-    title = artist + " during " + tour_name
 
     # Get data from setlist.fm
-    setlist_data = setlist_util.get_songs_by_tour(artist, tour_name);
+    setlist_data = setlist_util.get_data_by_tour(artist, tour_name);
     songs = setlist_data['songs']
     artist = setlist_data['artist']
     tour_name = setlist_data['tour']
