@@ -10,9 +10,9 @@ CONTENTS OF THIS FILE
 INTRODUCTION
 ------------
 
-The GigBag app launches a website hosted locally that uses command line
-arguments to search a specific tour or concert on setlist.fm and creates
-a Spotify playlist of the resulting set.
+The GigBag app launches a website hosted locally that searches
+a specific tour or concert on setlist.fm and creates a Spotify
+playlist of the resulting set.
 
  * For source code:
    https://github.com/carsonclarke570/BrickHack4
