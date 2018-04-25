@@ -21,7 +21,7 @@
 #           tour: name of tour
 #
 
-import base64, json, os, requests, sys, urllib
+import base64, json, os, requests, sys, urllib, pprint
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from gigbag.lib import spotify_util, setlist_util
@@ -62,23 +62,39 @@ def index():
     return render_template("index.html")
 
 #
-# Redirects to Spotify's authorization service
+# Redirects to Spotify's authorization service for searching by tour
 #
 # Returns:
 #    A redirect to the Spotify authorization service
 #
-@app.route("/authorize", methods=['GET', 'POST'])
-def authorize():
+@app.route("/authorizetour", methods=['GET', 'POST'])
+def authorizetour():
     artist = request.args.get('artist')
     tour = request.args.get('tour')
-    state_json = json.dumps({"artist": artist, "tour": tour})
+    state_json = json.dumps({"artist": artist, "arg": tour, "type": "tour"})
     auth_query_parameters['state'] = state_json
     url_args = "&".join(["{}={}".format(key, urllib.quote(val)) for key, val in auth_query_parameters.iteritems()])
     auth_url = "{}/?{}".format(SPOTIFY_AUTH_URL, url_args)
     return redirect(auth_url)
 
 #
-# Confirms Spotify authorization and creates playlist from commandline data
+# Redirects to Spotify's authorization service for searching by date
+#
+# Returns:
+#    A redirect to the Spotify authorization service
+#
+@app.route("/authorizedate", methods=['GET', 'POST'])
+def authorizedate():
+    artist = request.args.get('artist')
+    date = request.args.get('date')
+    state_json = json.dumps({"artist": artist, "arg": date, "type": "date"})
+    pprint.pprint(state_json)
+    auth_query_parameters['state'] = state_json
+    url_args = "&".join(["{}={}".format(key, urllib.quote(val)) for key, val in auth_query_parameters.iteritems()])
+    auth_url = "{}/?{}".format(SPOTIFY_AUTH_URL, url_args)
+    return redirect(auth_url)
+#
+# Confirms Spotify authorization and creates playlists
 #
 # Returns:
 #   Renders index.html
@@ -110,14 +126,19 @@ def callback():
 
     # Get data from URL
     artist = data['artist']
-    tour_name = data['tour']
+    arg = data['arg']
 
     # Get data from setlist.fm
-    setlist_data = setlist_util.get_data_by_tour(artist, tour_name);
-    songs = setlist_data['songs']
-    artist = setlist_data['artist']
-    tour_name = setlist_data['tour']
-    title = artist + "[" + tour_name + "]"
+    if data['type'] == 'tour':
+        setlist_data = setlist_util.get_data_by_tour(artist, arg);
+        songs = setlist_data['songs']
+        artist = setlist_data['artist']
+        tour_name = setlist_data['tour']
+        title = artist + "[" + tour_name + "]"
+    elif data['type'] == 'date':
+        setlist_data = setlist_util.get_songs_by_event(artist, arg)
+        songs = setlist_data['songs']
+        artist = setlist_data['artist']
 
 
 

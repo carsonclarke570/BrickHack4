@@ -36,22 +36,17 @@ def get_data_by_tour(artist, tour):
     url = "https://api.setlist.fm/rest/1.0/search/setlists?artistName=" + artist + "&tourName=" + tour + "&"
     data = json.loads(requests.get(url, headers=HEADERS).text)
 
-    pprint.pprint(data)
-
     if 'code' in data.keys() and data['code'] == 404:
         return None
 
-    numPages = int(math.ceil(float(data['total'])/ITEMS_PER_PAGE))
-    songs = []
-    for page in range(1, numPages+1):
-        r = json.loads(requests.get(url + "&p=" + str(page), headers=HEADERS).text)
-        setlists = r['setlist']
-        for lst in setlists:
-            for set in lst['sets']['set']:
-                for song in set['song']:
-                    if not song['name'] in songs:
-                        songs.append(song['name'])
+    pprint.pprint(data)
 
+    songs = []
+    for lst in data['setlist']:
+        for set in lst['sets']['set']:
+            for song in set['song']:
+                if not song['name'] in songs:
+                    songs.append(song['name'])
 
     return {"songs" : songs, "artist": data['setlist'][0]['artist']['name'], "tour": data['setlist'][0]['tour']['name']}
 
@@ -65,6 +60,7 @@ def get_data_by_tour(artist, tour):
 #
 # Returns:
 #   A list of songs played by artist at a specific concert
+#   or None if no search results could be found
 #
 def get_songs_by_event(artist, date):
     artist = urllib.quote(artist.encode('utf8'))
@@ -72,8 +68,11 @@ def get_songs_by_event(artist, date):
     r = requests.get("https://api.setlist.fm/rest/1.0/search/setlists?date=" + date + "&artistName=" + artist, headers=HEADERS)
     data = json.loads(r.text)
 
+    if 'code' in data.keys() and data['code'] == 404:
+        return None
+
     songs = []
     for set in data['setlist'][0]['sets']['set']:
         for song in set['song']:
             songs.append(song['name'])
-    return songs
+    return {"songs" : songs, "artist": data['setlist'][0]['artist']['name']}
