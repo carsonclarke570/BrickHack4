@@ -131,23 +131,15 @@ def callback():
     # Get data from setlist.fm
     if data['type'] == 'tour':
         setlist_data = setlist_util.get_data_by_tour(artist, arg);
-        songs = setlist_data['songs']
-        artist = setlist_data['artist']
-        tour_name = setlist_data['tour']
-        title = artist + "[" + tour_name + "]"
     elif data['type'] == 'date':
         setlist_data = setlist_util.get_songs_by_event(artist, arg)
-        songs = setlist_data['songs']
-        artist = setlist_data['artist']
 
+    pprint.pprint(setlist_data)
 
-
-    # if option == "-c":
-    #     artist = search_args[0]
-    #     date = search_args[1]
-    #     venue = search_args[2]
-    #     title = artist + " at " + venue + " on " + date
-    #     songs = setlist_util.get_songs_by_event(artist, date, venue)
+    songs = setlist_data['songs']
+    artist = setlist_data['artist']
+    tour_name = setlist_data['tour']
+    title = artist + "[" + tour_name + "]"
 
     context = []
     song_ids = []
@@ -163,10 +155,10 @@ def callback():
 
 
     # create Spotify playlist
-    playlist_id = spotify_util.init_playlist(user_id, title, auth_header_json)["id"]
+    #playlist_id = spotify_util.init_playlist(user_id, title, auth_header_json)["id"]
 
     # add songs to playlist
-    spotify_util.add_song(song_ids, user_id, playlist_id, auth_header_json)
+    #spotify_util.add_song(song_ids, user_id, playlist_id, auth_header_json)
 
     return render_template("success.html", context=context)
 

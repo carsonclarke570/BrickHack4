@@ -29,7 +29,7 @@ INSTALLATION
 ------------
 
  * To run the program:
-        1) Run either: python gig_bag.py
+        1) Run: python gig_bag.py
         2) Visit 127.0.0.1:8080 in your web browser
 
  * WARNING: The code can run slowly sometimes. Be patient.

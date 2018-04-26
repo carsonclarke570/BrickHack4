@@ -39,8 +39,6 @@ def get_data_by_tour(artist, tour):
     if 'code' in data.keys() and data['code'] == 404:
         return None
 
-    pprint.pprint(data)
-
     songs = []
     for lst in data['setlist']:
         for set in lst['sets']['set']:
@@ -64,9 +62,12 @@ def get_data_by_tour(artist, tour):
 #
 def get_songs_by_event(artist, date):
     artist = urllib.quote(artist.encode('utf8'))
+    date = ymd_to_dmy(date)
     date = urllib.quote(date.encode('utf8'))
     r = requests.get("https://api.setlist.fm/rest/1.0/search/setlists?date=" + date + "&artistName=" + artist, headers=HEADERS)
     data = json.loads(r.text)
+
+    pprint.pprint(data)
 
     if 'code' in data.keys() and data['code'] == 404:
         return None
@@ -75,4 +76,16 @@ def get_songs_by_event(artist, date):
     for set in data['setlist'][0]['sets']['set']:
         for song in set['song']:
             songs.append(song['name'])
-    return {"songs" : songs, "artist": data['setlist'][0]['artist']['name']}
+    return {"songs" : songs, "artist": data['setlist'][0]['artist']['name'], "tour": data['setlist'][0]['tour']['name']}
+
+#
+# Converts a date string from yyyy-mm-dd to dd-mm-yy
+#
+# Params:
+#   date: the date to convert
+#
+# Returns:
+#   Converted date
+#
+def ymd_to_dmy(date):
+    return date[8:10] + "-" + date[5:7] + "-" + date[0:4]
