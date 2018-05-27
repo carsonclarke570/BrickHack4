@@ -56,18 +56,20 @@
                 <form action="/authorizetour" method="get">
                     <div class="form-group">
                         <label for="t_artist">Artist</label>
-                        <input type="text" class="form-control" name="artist" id="t_artist" placeholder="Enter artist">
+                        <input type="text" class="form-control" name="artist" id="t_artist" placeholder="Enter artist"
+                               required="true">
                     </div>
                     <div class="form-group">
                         <label for="tour">Tour</label>
-                        <input type="text" class="form-control" name="tour" id="tour" placeholder="Enter tour name">
+                        <input type="text" class="form-control" name="tour" id="tour" placeholder="Enter tour name"
+                               required="true">
                     </div>
                     <button type="submit" class="btn btn-primary">Submit</button>
                 </form>
             </div>
         </div>
         <div class="card">
-            <img class="card-img-top" src="../static/images/tour.jpg" alt="Card image cap">
+            <img class="card-img-top" src="../static/images/date.png" alt="Card image cap">
             <div class="card-body">
                 <h5 class="card-title">Create From Date</h5>
                 <p class="card-text">Do you rememeber the location and date of the concert? Use this form to create a
@@ -80,18 +82,20 @@
                 <form action="/authorizedate" method="get">
                     <div class="form-group">
                         <label for="d_artist">Artist</label>
-                        <input type="text" class="form-control" name="artist" id="d_artist" placeholder="Enter artist">
+                        <input type="text" class="form-control" name="artist" id="d_artist" placeholder="Enter artist"
+                               required="true">
                     </div>
                     <div class="form-group">
                         <label for="date">Date</label>
-                        <input type="date" class="form-control" name="date" id="date" placeholder="Enter date">
+                        <input type="date" class="form-control" name="date" id="date" placeholder="Enter date"
+                               required="true">
                     </div>
                     <button type="submit" class="btn btn-primary">Submit</button>
                 </form>
             </div>
         </div>
         <div class="card">
-            <img class="card-img-top" src="../static/images/tour.jpg" alt="Card image cap">
+            <img class="card-img-top" src="../static/images/search.jpeg" alt="Card image cap">
             <div class="card-body">
                 <h5 class="card-title">Search</h5>
                 <p class="card-text">Don't know all the information? No worries! Search setlist.fm for the concert you
@@ -102,9 +106,26 @@
             </div>
             <div class="card-body">
                 <form action="/search" method="get">
-                    <div class="form-group">
-                        <label for="search">Search</label>
-                        <input type="text" class="form-control" name="query" id="search" placeholder="Search">
+
+                    <div class="form-row">
+                        <div class="form-group col">
+                            <label for="s_artist">Artist</label>
+                            <input type="text" class="form-control" name="artist" id="s_artist" placeholder="Artist">
+                        </div>
+                        <div class="form-group col">
+                            <label for="s_date">Date</label>
+                            <input type="date" class="form-control" name="date" id="s_date" placeholder="Date">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col">
+                            <label for="venue">Venue</label>
+                            <input type="text" class="form-control" name="venue" id="venue" placeholder="Venue">
+                        </div>
+                        <div class="form-group col">
+                            <label for="city">City</label>
+                            <input type="text" class="form-control" name="city" id="city" placeholder="City">
+                        </div>
                     </div>
                     <button type="submit" class="btn btn-primary">Submit</button>
                 </form>

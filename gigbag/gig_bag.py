@@ -93,6 +93,26 @@ def authorizedate():
     url_args = "&".join(["{}={}".format(key, urllib.quote(val)) for key, val in auth_query_parameters.iteritems()])
     auth_url = "{}/?{}".format(SPOTIFY_AUTH_URL, url_args)
     return redirect(auth_url)
+
+#
+# Redirects to Spotify's authorization service for searching
+#
+# Returns:
+#    A redirect to the Spotify authorization service
+#
+@app.route("/search", methods=['GET', 'POST'])
+def search():
+    artist = request.args.get('artist')
+    date = request.args.get('date')
+    venue = request.args.get('venue')
+    city = request.args.get('city')
+    state_json = json.dumps({"artist": artist, "date": date, "venue": venue, "city": city, "type": "search"})
+    pprint.pprint(state_json)
+    auth_query_parameters['state'] = state_json
+    url_args = "&".join(["{}={}".format(key, urllib.quote(val)) for key, val in auth_query_parameters.iteritems()])
+    auth_url = "{}/?{}".format(SPOTIFY_AUTH_URL, url_args)
+    return redirect(auth_url)
+
 #
 # Confirms Spotify authorization and creates playlists
 #
@@ -124,43 +144,78 @@ def callback():
     profile_response = requests.get(user_profile_api_endpoint, headers=auth_header)
     user_id = json.loads(profile_response.text)["id"]
 
-    # Get data from URL
-    artist = data['artist']
-    arg = data['arg']
-
     # Get data from setlist.fm
     if data['type'] == 'tour':
+        # Get data from URL
+        artist = data['artist']
+        arg = data['arg']
+        # Query the Setlist.fm API
         setlist_data = setlist_util.get_data_by_tour(artist, arg);
     elif data['type'] == 'date':
+        # Get data from URL
+        artist = data['artist']
+        arg = data['arg']
+        # Query the Setlist.fm API
         setlist_data = setlist_util.get_songs_by_event(artist, arg)
+    elif data['type'] == 'search':
+        # Get data from URL
+        artist = data['artist']
+        date = data['date']
+        venue = data['venue']
+        city = data['city']
+        # Query the Setlist.fm API
+        setlist_data = setlist_util.get_data_by_search(artist, date, venue, city, 1)
+
 
     pprint.pprint(setlist_data)
 
-    songs = setlist_data['songs']
-    artist = setlist_data['artist']
-    tour_name = setlist_data['tour']
-    title = artist + "[" + tour_name + "]"
+    if data['type'] == 'date' or data['type'] == 'tour':
+        # Get context information
+        songs = setlist_data['songs']
+        artist = setlist_data['artist']
+        tour_name = setlist_data['tour']
+        title = artist + " [" + tour_name + "]"
 
-    context = []
-    song_ids = []
-    for i in songs:
-        response = spotify_util.get_song(artist, i, auth_header)
-        if 'id' in response.keys():
-            s_id = "spotify:track:" + response["id"]
-            a_url = response["album"]["images"][2]["url"]
-            context.append({"s_name": i, "a_url": a_url})
-            song_ids.append(s_id)
-        else:
-            songs.remove(i)
+        context = []
+        song_ids = []
+        for i in songs:
+            response = spotify_util.get_song(artist, i, auth_header)
+            if 'id' in response.keys():
+                s_id = "spotify:track:" + response["id"]
+                a_url = response["album"]["images"][2]["url"]
+                context.append({"s_name": i, "a_url": a_url})
+                song_ids.append(s_id)
+            else:
+                songs.remove(i)
 
+        # create Spotify playlist
+        playlist_id = spotify_util.init_playlist(user_id, title, auth_header_json)["id"]
+        # add songs to playlist
+        spotify_util.add_song(song_ids, user_id, playlist_id, auth_header_json)
+        return render_template("success.html", context=context)
+    else:
+        # Get context information
+        context = []
+        prev_artist = None
+        for setlist in setlist_data:
+            artist = setlist['artist']['name']
+            date = setlist['eventDate']
+            venue = setlist['venue']['name']
+            city = setlist['venue']['city']['name']
+            has_set = True if setlist['sets']['set'] else False
 
-    # create Spotify playlist
-    #playlist_id = spotify_util.init_playlist(user_id, title, auth_header_json)["id"]
+            #Get Spotify artist data
+            if prev_artist is not artist:
+                data = spotify_util.get_artist(artist, auth_header)
+                if data is not None:
+                    img = data['images'][0]['url']
+                else:
+                    img = "..."
 
-    # add songs to playlist
-    #spotify_util.add_song(song_ids, user_id, playlist_id, auth_header_json)
+            prev_artist = artist
+            context.append({"artist": artist, "date": date, "venue": venue, "city": city, "hasSet": has_set, "img": img})
 
-    return render_template("success.html", context=context)
+        return render_template("search.html", context=context)
 
 if __name__ == '__main__':
     app.run(debug=True, port=PORT)

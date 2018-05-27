@@ -12,7 +12,7 @@
 # Description: Provides helper functions to interact with Spotify
 #
 
-import json, requests, urllib
+import json, requests, urllib, pprint, codecs
 
 # URL Constants
 SPOTIFY_API_BASE_URL = "https://api.spotify.com/v1"
@@ -62,9 +62,9 @@ def init_playlist(user_id, name, auth):
 #   The response JSON
 #
 def get_song(artist, song, auth):
-    song_api_endpoint = "{}/search".format(SPOTIFY_API_BASE_URL);
+    song_api_endpoint = "{}/search".format(SPOTIFY_API_BASE_URL)
     res = song_api_endpoint + "?q=" + urllib.quote(song.encode('utf8')) + "+" + urllib.quote(artist.encode('utf8'))
-    res = res + "&type=track&limit=1";
+    res = res + "&type=track&limit=1"
     song_api_response = requests.get(res, headers=auth)
     song_api_response = json.loads(song_api_response.text)
     for i in song_api_response["tracks"]["items"]:
@@ -73,3 +73,29 @@ def get_song(artist, song, auth):
                 song_api_response = i
 
     return song_api_response
+
+#
+# Gets the Spotify JSON associated with a specific artist
+#
+# Params:
+#   artist: the name of the artist
+#   auth: the authourization header
+#
+# Returns:
+#   The response JSON
+#
+def get_artist(artist, auth):
+    artist_api_endpoint = "{}/search".format(SPOTIFY_API_BASE_URL)
+    res = artist_api_endpoint + "?q=" + urllib.quote(artist.encode('utf8'))
+    res = res + "&type=track"
+    artist_api_response = requests.get(res, headers=auth)
+    artist_api_response = json.loads(artist_api_response.text)
+
+    items = artist_api_response['tracks']['items']
+    for i in items:
+        pprint.pprint(type(artist))
+        if i['album']['artists'][0]['name'].decode('utf8') == artist:
+            data = json.loads(requests.get(i['album']['artists'][0]['href'], headers=auth).text)
+            return data
+
+    return None

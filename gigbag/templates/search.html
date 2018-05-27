@@ -36,38 +36,31 @@
 <!-- End Nav Bar -->
 
 <div class="container">
-    <h2 class="mt-4 text-center">Your Playlist is Complete!</h2>
-    <p class="text-center">Check your Spotify for the results!</p>
+    <h2 class="mt-4 text-center">Search Results</h2>
 </div>
 
 <!-- Begin List -->
 <div class="container">
+    {% for i in range(5) %}
     <div class="row">
+        {% for j in range(4) %}
         <div class="col">
-            <ul class="list-group mt1 mb2">
-                {% for s in context %}
-                {% if loop.index0 < context|length / 2 %}
-                <li class="list-group-item">
-                    <span><img src="{{ s['a_url'] }}" alt="Image Not Found"></span>
-                    {{ s['s_name'] }}
-                </li>
-                {% endif %}
-                {% endfor %}
-            </ul>
+            <div class="card mt-1 mb-1">
+                <img class="card-img-top" src="{{ context[(i * 4) + j]['img'] }}" alt="Image Here">
+                <div class="card-body">
+                    <h5 class="card-title">{{ context[(i * 4) + j]['artist'] }} - {{ context[(i * 4) + j]['date'] }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ context[(i * 4) + j]['venue'] }} - {{ context[(i * 4) + j]['city'] }}</h6>
+                    {% if context[(i * 4) + j]['hasSet'] %}
+                    <p class="card-text">Setlist Available</p>
+                    {% else %}
+                    <p class="card-text">Setlist Unavailable</p>
+                    {% endif %}
+                </div>
+            </div>
         </div>
-        <div class="col">
-            <ul class="list-group mt1 mb2">
-                {% for s in context %}
-                {% if loop.index0 >= context|length / 2 %}
-                <li class="list-group-item">
-                    <span><img src="{{ s['a_url'] }}" alt="Image Not Found"></span>
-                    {{ s['s_name'] }}
-                </li>
-                {% endif %}
-                {% endfor %}
-            </ul>
-        </div>
+        {% endfor %}
     </div>
+    {% endfor %}
 </div>
 
 <!-- Optional JavaScript -->
